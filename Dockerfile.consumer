@@ -1,0 +1,14 @@
+FROM maven:3.9.6-eclipse-temurin-21-alpine as builder
+ARG PROFILE
+
+COPY consumer-service/src /usr/app/src
+COPY consumer-service/pom.xml /usr/app
+COPY pom.xml /usr/
+
+RUN mvn -f /usr/app/pom.xml clean package -Dactive.spring.profiles=${PROFILE}
+
+FROM eclipse-temurin:21-alpine
+
+COPY --from=builder /usr/app/target/*.jar /usr/app/app.jar
+
+ENTRYPOINT ["java", "-jar", "/usr/app/app.jar"]

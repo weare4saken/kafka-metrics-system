@@ -1,0 +1,108 @@
+openapi: 3.0.1
+info:
+  title: 'Consumer Metrics API'
+  description: 'Metrics System OpenApi documentation'
+  contact:
+    name: 'Ilya Kondratyuk'
+    url: 'https://github.com/weare4saken/'
+    email: 'kondrashka91@gmail.com'
+  version: '1.0'
+paths:
+  /api/v1/metrics:
+    get:
+      tags:
+        - "Metrics Controller"
+      summary: 'Get endpoint to get all metrics data'
+      description: 'The endpoint for getting all metrics data that is currently relevant'
+      operationId: getAllMetrics
+      responses:
+        '200':
+          $ref: '#/components/responses/ArraysOfMetricsData'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+  /api/v1/metrics/{id}:
+    get:
+      tags:
+        - "Metrics Controller"
+      summary: 'Get endpoint to get metrics data by id'
+      description: 'The endpoint for getting a required metrics data by specifying its id (name)'
+      operationId: getMetrics
+      parameters:
+        - in: path
+          name: "id"
+          description: "metrics data id (name)"
+          required: true
+          schema:
+            type: string
+            example: "jvm.info"
+      responses:
+        '200':
+          $ref: '#/components/responses/MetricsData'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    AnyValue:
+      description: 'Can be anything: string, number, array, object, etc. (except `null`)'
+      anyOf:
+        - type: string
+        - type: number
+        - type: array
+        - type: object
+    Response:
+      description: 'Metrics Data'
+      type: object
+      properties:
+        name:
+          type: string
+          example: "jvm.info"
+        data:
+          $ref: '#/components/schemas/AnyValue'
+        description:
+          type: string
+          example: "JVM version info"
+    Error:
+      description: 'Error response'
+      type: object
+      properties:
+        type:
+          type: string
+          example: "about:blank"
+        title:
+          type: string
+          example: "Bad Request"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "Invalid request"
+        instance:
+          type: string
+          example: "/api/metrics"
+        properties:
+          type: object
+          nullable: true
+  responses:
+    ArraysOfMetricsData:
+      description: 'A list of metrics data'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Response'
+    MetricsData:
+      description: 'Metrics data'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Response'
+    ErrorResponse:
+      description: 'Error response'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

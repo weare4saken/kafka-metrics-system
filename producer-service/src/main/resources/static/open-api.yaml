@@ -1,0 +1,93 @@
+openapi: 3.0.1
+info:
+  title: 'Producer Metrics API'
+  description: 'Metrics System OpenApi documentation'
+  contact:
+    name: 'Ilya Kondratyuk'
+    url: 'https://github.com/weare4saken/'
+    email: 'kondrashka91@gmail.com'
+  version: '1.0'
+paths:
+  /api/v1/metrics:
+    post:
+      tags:
+        - "Metrics Controller"
+      summary: 'Post endpoint to publish metrics data'
+      description: 'The endpoint for receiving any custom metrics data that needs to be passed on'
+      operationId: publishMetrics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payload'
+            examples:
+              Plain:
+                value:
+                  name: 'rest.controller.employees'
+                  data: "down"
+                  description: "State of the employees rest controller"
+              Nested:
+                value:
+                  name: 'app.database.health'
+                  data:
+                    status: 'active'
+                    uptime:
+                      timeUnit: 'DAYS'
+                      value: 497
+                  description: "Information on the database health status"
+      responses:
+        '200':
+          description: 'Ok'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  schemas:
+    AnyValue:
+      description: 'Can be anything: string, number, array, object, etc. (except `null`)'
+      anyOf:
+        - type: string
+        - type: number
+        - type: array
+        - type: object
+    Payload:
+      description: 'Payload of metrics data'
+      type: object
+      required:
+        - name
+        - data
+      properties:
+        name:
+          type: string
+        data:
+          $ref: '#/components/schemas/AnyValue'
+        description:
+          type: string
+    Error:
+      description: 'Error response'
+      type: object
+      properties:
+        type:
+          type: string
+          example: "about:blank"
+        title:
+          type: string
+          example: "Bad Request"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "Invalid request"
+        instance:
+          type: string
+          example: "/api/metrics"
+        properties:
+          type: object
+          nullable: true
+  responses:
+    ErrorResponse:
+      description: 'Error response'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

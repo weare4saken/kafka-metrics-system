@@ -5,14 +5,14 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - 22181:2181
+      - "22181:2181"
 
   kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     ports:
-      - 29092:29092
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -20,3 +20,27 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  producer-service:
+    build:
+      dockerfile: Dockerfile.producer
+    container_name: metrics-producer
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      PRODUCER-SERVICE_KAFKA_TOPIC: "metrics-topic"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: 'kafka:9092'
+
+  consumer-service:
+    build:
+      dockerfile: Dockerfile.consumer
+    container_name: metrics-consumer-h2
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      CONSUMER_SERVICE_KAFKA_TOPIC: "metrics-topic"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: 'kafka:9092'
